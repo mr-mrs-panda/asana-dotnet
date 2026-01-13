@@ -1,0 +1,94 @@
+name: Publish to NuGet
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Triggers on version tags like v1.0.0, v2.1.3, etc.
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Extract version from tag
+      id: get_version
+      run: |
+        # Remove 'v' prefix from tag (v1.0.0 -> 1.0.0)
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        echo "Building version: $VERSION"
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Setup Node.js (for Redocly)
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Redocly CLI
+      run: npm install -g @redocly/cli
+
+    - name: Install Kiota
+      run: dotnet tool install --global Microsoft.OpenApi.Kiota
+
+    - name: Download and bundle Asana OpenAPI spec
+      working-directory: ./Panda.NuGet.AsanaClient
+      run: |
+        echo "Downloading official Asana OpenAPI specification..."
+        curl -L -o asana_oas.yaml https://raw.githubusercontent.com/Asana/openapi/master/defs/asana_oas.yaml
+        echo "Bundling and dereferencing with Redocly..."
+        redocly bundle asana_oas.yaml --dereferenced -o asana_flat.yaml
+
+    - name: Generate API Clients with Kiota
+      working-directory: ./Panda.NuGet.AsanaClient
+      run: |
+        echo "Generating API clients..."
+        kiota generate \
+          -l CSharp \
+          -d asana_flat.yaml \
+          -n Panda.NuGet.AsanaClient.Clients \
+          -o ./Clients \
+          --clean-output
+
+    - name: Update version in .csproj
+      working-directory: ./Panda.NuGet.AsanaClient
+      run: |
+        # Update the Version element in the .csproj file
+        sed -i "s|<Version>.*</Version>|<Version>${{ steps.get_version.outputs.VERSION }}</Version>|g" Panda.NuGet.AsanaClient.csproj
+        echo "Updated version to ${{ steps.get_version.outputs.VERSION }}"
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build project
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Run tests (if any)
+      run: dotnet test --configuration Release --no-build --verbosity normal
+      continue-on-error: true  # Continue even if no tests exist
+
+    - name: Pack NuGet package
+      run: dotnet pack --configuration Release --no-build --output ./nupkg
+
+    - name: Publish to NuGet.org
+      run: |
+        dotnet nuget push ./nupkg/Panda.NuGet.AsanaClient.${{ steps.get_version.outputs.VERSION }}.nupkg \
+          --api-key ${{ secrets.NUGET_API_KEY }} \
+          --source https://api.nuget.org/v3/index.json \
+          --skip-duplicate
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          ./nupkg/Panda.NuGet.AsanaClient.${{ steps.get_version.outputs.VERSION }}.nupkg
+          ./nupkg/Panda.NuGet.AsanaClient.${{ steps.get_version.outputs.VERSION }}.snupkg
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,73 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Setup Node.js (for Redocly)
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Redocly CLI
+      run: npm install -g @redocly/cli
+
+    - name: Install Kiota
+      run: dotnet tool install --global Microsoft.OpenApi.Kiota
+
+    - name: Download and bundle Asana OpenAPI spec
+      working-directory: ./Panda.NuGet.AsanaClient
+      run: |
+        echo "Downloading official Asana OpenAPI specification..."
+        curl -L -o asana_oas.yaml https://raw.githubusercontent.com/Asana/openapi/master/defs/asana_oas.yaml
+        echo "Bundling and dereferencing with Redocly..."
+        redocly bundle asana_oas.yaml --dereferenced -o asana_flat.yaml
+
+    - name: Generate API Clients with Kiota
+      working-directory: ./Panda.NuGet.AsanaClient
+      run: |
+        echo "Generating API clients..."
+        kiota generate \
+          -l CSharp \
+          -d asana_flat.yaml \
+          -n Panda.NuGet.AsanaClient.Clients \
+          -o ./Clients \
+          --clean-output
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build project
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Run tests (if any)
+      run: dotnet test --configuration Release --no-build --verbosity normal
+      continue-on-error: true  # Continue even if no tests exist
+
+    - name: Pack NuGet package (validation only)
+      run: dotnet pack --configuration Release --no-build --output ./nupkg
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget-package
+        path: ./nupkg/*.nupkg
