@@ -79,27 +79,12 @@ jobs:
     - name: Pack NuGet package
       run: dotnet pack --configuration Release --no-build --output ./nupkg
 
-    - name: Decode signing certificate
-      run: |
-        echo "${{ secrets.NUGET_SIGNING_CERT }}" | base64 --decode > nuget-signing.pfx
-
-    - name: Sign NuGet package
-      run: |
-        dotnet nuget sign ./nupkg/Panda.NuGet.AsanaClient.${{ steps.get_version.outputs.VERSION }}.nupkg \
-          --certificate-path nuget-signing.pfx \
-          --certificate-password "${{ secrets.NUGET_SIGNING_CERT_PASSWORD }}" \
-          --timestamper http://timestamp.digicert.com
-
     - name: Publish to NuGet.org
       run: |
         dotnet nuget push ./nupkg/Panda.NuGet.AsanaClient.${{ steps.get_version.outputs.VERSION }}.nupkg \
           --api-key ${{ secrets.NUGET_API_KEY }} \
           --source https://api.nuget.org/v3/index.json \
           --skip-duplicate
-
-    - name: Cleanup certificate
-      if: always()
-      run: rm -f nuget-signing.pfx
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
