@@ -12,8 +12,8 @@
     <Company>librics GmbH &amp; Co. KG</Company>
     <Description>A .NET client library for the Asana API, generated with Kiota. Provides a strongly-typed, modern async API client with full support for dependency injection.</Description>
     <PackageTags>asana;api;client;kiota;rest;httpclient;dependency-injection</PackageTags>
-    <PackageProjectUrl>https://github.com/yourusername/Panda.NuGet.AsanaClient</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/yourusername/Panda.NuGet.AsanaClient</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/mr-mrs-panda/asana-dotnet</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mr-mrs-panda/asana-dotnet</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>

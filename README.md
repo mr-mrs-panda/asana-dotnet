@@ -12,6 +12,10 @@ A modern, strongly-typed .NET client library for the [Asana API](https://develop
 - ✅ **Easy authentication** - Simple Bearer token authentication
 - ✅ **Extensible** - Support for custom authentication providers
 
+## Important Notice
+
+> **Unofficial Library:** This is an unofficial community-maintained library and is not affiliated with or endorsed by Asana. There is no guarantee for future maintenance or updates. Use at your own discretion.
+
 ## Installation
 
 ```bash
@@ -410,9 +414,9 @@ Copyright (c) 2026 Mr. & Mrs. Panda - librics GmbH & Co. KG
 ## Support
 
 For issues and questions:
-- [GitHub Issues](https://github.com/yourusername/Panda.NuGet.AsanaClient/issues)
+- [GitHub Issues](https://github.com/mr-mrs-panda/asana-dotnet/issues)
 - [Asana Developer Forum](https://forum.asana.com/c/developersapi)
 
 ---
 
-**Note:** This library is not officially maintained by Asana. For official support, please refer to the [Asana Developer Documentation](https://developers.asana.com/docs).
+**Note:** This library is not officially maintained by Asana and is provided as-is without any warranties or guarantees of future maintenance. For official support, please refer to the [Asana Developer Documentation](https://developers.asana.com/docs).
