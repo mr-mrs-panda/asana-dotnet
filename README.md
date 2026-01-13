@@ -173,7 +173,34 @@ var tasks = await apiClient.Tasks.GetAsync(requestConfiguration =>
 });
 ```
 
-## API Coverage
+### Extended Properties for Task Creation
+
+The auto-generated Asana OpenAPI specification is incomplete and missing common properties like `Name` and `Notes` for task creation. This library includes **partial class extensions** that add these missing properties for a better developer experience:
+
+```csharp
+var taskRequest = new TasksPostRequestBody
+{
+    Data = new TasksPostRequestBody_data
+    {
+        // ✅ Extended properties (not in OpenAPI spec, but fully supported)
+        Name = "My Task",              // Task name
+        Notes = "Task description",    // Plain text notes
+        HtmlNotes = "<p>Rich text</p>", // HTML formatted notes
+        DueOn = "2026-01-20",          // Due date (YYYY-MM-DD)
+        DueAt = "2026-01-20T15:00:00Z", // Due date with time (ISO 8601)
+        StartOn = "2026-01-13",        // Start date
+        Completed = false,             // Completion status
+
+        // Standard properties from OpenAPI spec
+        Assignee = "user-gid",
+        Projects = new List<string> { "project-gid" },
+        Workspace = "workspace-gid"
+    }
+};
+```
+
+The `Extensions/` directory contains partial class extensions that add these commonly-used properties which are missing from the auto-generated OpenAPI specification.
+
 
 This library supports the complete Asana API including:
 
@@ -290,6 +317,8 @@ Panda.NuGet.AsanaClient/
     ├── Panda.NuGet.AsanaClient.csproj
     ├── AsanaApiClient.cs            # High-level API client wrapper
     ├── AsanaServiceCollectionExtensions.cs  # DI extensions
+    ├── Extensions/                  # Partial class extensions for generated types
+    │   └── TasksPostRequestBody_data.Extensions.cs  # Adds missing properties (Name, Notes, etc.)
     ├── asana_oas.yaml               # Downloaded original OpenAPI spec (not committed)
     ├── asana_flat.yaml              # Bundled/dereferenced spec (not committed)
     └── Clients/                     # ⚠️ Auto-generated - DO NOT EDIT
@@ -300,6 +329,8 @@ Panda.NuGet.AsanaClient/
 ```
 
 **⚠️ Important:** The `Clients/` directory is completely auto-generated. Never manually edit files in this directory as they will be overwritten.
+
+**💡 Tip:** The `Extensions/` directory contains partial class extensions that add missing properties to the auto-generated types (e.g., `Name`, `Notes` for tasks). These extensions are preserved during updates and provide a better developer experience.
 
 ## Getting an Asana Access Token
 
