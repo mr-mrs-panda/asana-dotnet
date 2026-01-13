@@ -8,6 +8,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required to create releases
+      packages: write  # Optional: for GitHub Packages
 
     steps:
     - name: Checkout code
