@@ -12,6 +12,7 @@ public static class AsanaServiceCollectionExtensions
 {
     /// <summary>
     /// Adds the Asana API client to the service collection using a Personal Access Token.
+    /// Registers both IAsanaApiClient and AsanaApiClient for dependency injection.
     /// </summary>
     /// <param name="services">The service collection</param>
     /// <param name="accessToken">Your Asana Personal Access Token</param>
@@ -32,12 +33,16 @@ public static class AsanaServiceCollectionExtensions
             return new AsanaApiClient(accessToken, httpClient);
         });
 
+        // Register interface that resolves to the same instance
+        services.AddSingleton<IAsanaApiClient>(sp => sp.GetRequiredService<AsanaApiClient>());
+
         return services;
     }
 
     /// <summary>
     /// Adds the Asana API client to the service collection using a token factory function.
     /// This is useful when the token needs to be retrieved from configuration or other sources.
+    /// Registers both IAsanaApiClient and AsanaApiClient for dependency injection.
     /// </summary>
     /// <param name="services">The service collection</param>
     /// <param name="tokenFactory">A function that returns the access token</param>
@@ -59,11 +64,15 @@ public static class AsanaServiceCollectionExtensions
             return new AsanaApiClient(token, httpClient);
         });
 
+        // Register interface that resolves to the same instance
+        services.AddSingleton<IAsanaApiClient>(sp => sp.GetRequiredService<AsanaApiClient>());
+
         return services;
     }
 
     /// <summary>
     /// Adds the Asana API client to the service collection with a custom authentication provider.
+    /// Registers both IAsanaApiClient and AsanaApiClient for dependency injection.
     /// </summary>
     /// <param name="services">The service collection</param>
     /// <param name="authenticationProviderFactory">A function that creates the authentication provider</param>
@@ -86,6 +95,9 @@ public static class AsanaServiceCollectionExtensions
             var httpClient = httpClientFactory.CreateClient(nameof(AsanaApiClient));
             return new AsanaApiClient(authProvider, httpClient);
         });
+
+        // Register interface that resolves to the same instance
+        services.AddSingleton<IAsanaApiClient>(sp => sp.GetRequiredService<AsanaApiClient>());
 
         return services;
     }
