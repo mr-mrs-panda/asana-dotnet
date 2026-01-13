@@ -243,9 +243,28 @@ dotnet pack --configuration Release
 
 ### Publishing to NuGet
 
+Publishing is automated via GitHub Actions. See [`.github/RELEASE.md`](.github/RELEASE.md) for detailed instructions.
+
+**Quick start:**
+
+1. Set up `NUGET_API_KEY` secret in GitHub repository settings
+2. Create and push a version tag:
+   ```bash
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
+3. The GitHub Actions workflow will automatically:
+   - Download latest Asana OpenAPI spec
+   - Generate API clients
+   - Build and test the project
+   - Publish to NuGet.org
+   - Create a GitHub release
+
+**Manual publishing:**
+
 ```bash
-# Publish to NuGet.org
-dotnet nuget push bin/Release/Panda.NuGet.AsanaClient.*.nupkg \
+# If needed, you can publish manually
+dotnet nuget push ./nupkg/Panda.NuGet.AsanaClient.*.nupkg \
     --api-key YOUR_NUGET_API_KEY \
     --source https://api.nuget.org/v3/index.json
 ```
@@ -254,6 +273,11 @@ dotnet nuget push bin/Release/Panda.NuGet.AsanaClient.*.nupkg \
 
 ```
 Panda.NuGet.AsanaClient/
+├── .github/
+│   ├── workflows/
+│   │   ├── build-and-test.yml       # CI workflow for builds
+│   │   └── publish-nuget.yml        # CD workflow for releases
+│   └── RELEASE.md                   # Release process documentation
 ├── init.sh                          # Initial setup script
 ├── update.sh                        # Update script for API clients
 ├── LICENSE                          # MIT License
