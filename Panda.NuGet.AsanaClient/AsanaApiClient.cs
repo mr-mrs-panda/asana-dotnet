@@ -9,7 +9,7 @@ namespace Panda.NuGet.AsanaClient;
 /// High-level client for interacting with the Asana API.
 /// Wraps the auto-generated Kiota API client with a simplified interface.
 /// </summary>
-public class AsanaApiClient
+public class AsanaApiClient : IAsanaApiClient
 {
     private readonly ApiClient _apiClient;
 
